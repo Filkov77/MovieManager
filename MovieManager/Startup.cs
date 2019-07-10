@@ -13,6 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using MovieManager.Models;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
+using MovieManager.Services;
+using Microsoft.Extensions.Options;
 
 namespace MovieManager
 {
@@ -35,11 +37,16 @@ namespace MovieManager
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.Configure<MovieDatabaseSettings>(
+                Configuration.GetSection(nameof(MovieDatabaseSettings)));
+
+            services.AddSingleton<IMovieDatabaseSettings>(sp =>
+                sp.GetRequiredService<IOptions<MovieDatabaseSettings>>().Value);
+
+            services.AddSingleton<IMovieService, MovieService>();
+
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-            services.AddDbContext<MovieManagerContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("MovieManagerContext")));
 
             services.AddMvc((options) =>
             {

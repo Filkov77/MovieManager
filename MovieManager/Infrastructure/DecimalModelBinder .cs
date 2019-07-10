@@ -26,7 +26,7 @@ public class DecimalModelBinder : IModelBinder
         {
             myValue = Convert.ToDecimal(value, CultureInfo.CurrentCulture);
         }
-        catch (FormatException e)
+        catch (FormatException)
         {
             // Error
             bindingContext.ModelState.TryAddModelError(
