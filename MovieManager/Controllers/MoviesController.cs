@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,9 +13,9 @@ namespace MovieManager.Controllers
     public class MoviesController : Controller
     {
         // private readonly MovieManagerContext _context;
-        private readonly IMovieService _movieService;
+        private readonly IDbService<Movie> _movieService;
 
-        public MoviesController(IMovieService movieService)
+        public MoviesController(IDbService<Movie> movieService)
         {
             _movieService = movieService;
         }
@@ -22,7 +23,16 @@ namespace MovieManager.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(string searchString, CancellationToken cancellationToken = default)
         {
-            var movies = await _movieService.GetAsync(searchString, cancellationToken).ConfigureAwait(false);
+            //TODO add paging with skip limit
+            IList<Movie> movies;
+            if (string.IsNullOrEmpty(searchString))
+            {
+                movies = await _movieService.GetAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                movies = await _movieService.GetAsync(searchString, nameof(Movie.Title), cancellationToken).ConfigureAwait(false);
+            }
 
             return View(movies);
         }

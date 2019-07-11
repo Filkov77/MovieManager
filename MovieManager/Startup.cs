@@ -43,7 +43,7 @@ namespace MovieManager
             services.AddSingleton<IMovieDatabaseSettings>(sp =>
                 sp.GetRequiredService<IOptions<MovieDatabaseSettings>>().Value);
 
-            services.AddSingleton<IMovieService, MovieService>();
+            services.AddSingleton(typeof(IDbService<>), typeof(DbService<>));
 
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);

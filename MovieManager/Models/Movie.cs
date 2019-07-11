@@ -7,7 +7,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace MovieManager.Models
 {
-    public class Movie
+    public class Movie : IIdentifiable
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
