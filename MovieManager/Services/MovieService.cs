@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using MongoDB.Bson;
 
 namespace MovieManager.Services
 {
@@ -27,14 +28,11 @@ namespace MovieManager.Services
 
         public async Task<List<Movie>> GetAsync(string searchString, CancellationToken cancellationToken = default)
         {
-            var allMoves = await _Movies.FindAsync(movie => true, null, cancellationToken);
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                FilterDefinition<Movie> filter = "%{ x : { $regex : " + searchString + " } }";
-                var builder = Builders<Movie>.Filter;
-                var filter1 = builder..Matches("x", "ABC");
-                allMoves = await _Movies.FindAsync(filter, null, cancellationToken);
-            }
+            // TODO if more complex filter needed, create a filter class
+            FilterDefinition<Movie> filter = string.IsNullOrEmpty(searchString) ? Builders<Movie>.Filter.Empty : Builders<Movie>.Filter.Regex("Title", new BsonRegularExpression(searchString));
+
+            var allMoves = await _Movies.FindAsync(filter, null, cancellationToken);
+
             return await (allMoves).ToListAsync();
             // string.IsNullOrEmpty(searchString) ? true : generateTitleFilter(movie, searchString)
         }
