@@ -2,23 +2,31 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace MovieManager.Models
 {
-    public class Movie
+    public class Movie : IIdentifiable
     {
-        public int Id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+
+        [BsonElement("title")]
         public string Title { get; set; }
 
-        [Display(Name = "Release Date")]
-        [DataType(DataType.Date)]
-        public DateTime ReleaseDate { get; set; }
-        public string Genre { get; set; }
+        [BsonElement("director")]
+        public string Director { get; set; }
 
-        [DataType(DataType.Currency)]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal Price { get; set; }
+        // TODO map as a list if needed
+        [BsonElement("actors")]
+        public string Actors { get; set; }
+
+        [BsonElement("image")]
+        public string Image { get; set; }
+
+        [BsonElement("year")]
+        public int Year { get; set; }
     }
 }

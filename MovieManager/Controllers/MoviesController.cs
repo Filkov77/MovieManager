@@ -1,34 +1,40 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MovieManager.Models;
+using MovieManager.Services;
 
 namespace MovieManager.Controllers
 {
     public class MoviesController : Controller
     {
-        private readonly MovieManagerContext _context;
+        // private readonly MovieManagerContext _context;
+        private readonly IDbService<Movie> _movieService;
 
-        public MoviesController(MovieManagerContext context)
+        public MoviesController(IDbService<Movie> movieService)
         {
-            _context = context;
+            _movieService = movieService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index(string searchString, CancellationToken cancellationToken = default)
         {
-            var movies = _context.Movie.Select(movie => movie);
-
-            if (!string.IsNullOrEmpty(searchString))
+            //TODO add paging with skip limit
+            IList<Movie> movies;
+            if (string.IsNullOrEmpty(searchString))
             {
-                movies = movies.Where(s => s.Title.Contains(searchString));
+                movies = await _movieService.GetAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                movies = await _movieService.GetAsync(searchString, nameof(Movie.Title), cancellationToken).ConfigureAwait(false);
             }
 
-            return View(await movies.ToListAsync(cancellationToken).ConfigureAwait(false));
+            return View(movies);
         }
 
         [AllowAnonymous]
@@ -41,14 +47,14 @@ namespace MovieManager.Controllers
 
         // GET: Movies/Details/5
         [HttpGet]
-        public async Task<IActionResult> Details(int? id, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Details(string id, CancellationToken cancellationToken = default)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var movie = await _context.Movie.FirstOrDefaultAsync(m => m.Id == id, cancellationToken).ConfigureAwait(false);
+            var movie = await _movieService.GetDetailsAsync(id, cancellationToken).ConfigureAwait(false);
             if (movie == null)
             {
                 return NotFound();
@@ -75,12 +81,11 @@ namespace MovieManager.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseDate,Genre,Price")] Movie movie, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Create([Bind("Id,Title,Director,Actors,Image, Year")] Movie movie, CancellationToken cancellationToken = default)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(movie);
-                await _context.SaveChangesAsync().ConfigureAwait(false);
+                var createdMovie = await _movieService.CreateAsync(movie, cancellationToken).ConfigureAwait(false);
                 return RedirectToAction(nameof(Index));
             }
             return View(movie);
@@ -88,14 +93,14 @@ namespace MovieManager.Controllers
 
         // GET: Movies/Edit/5
         [HttpGet]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(string id, CancellationToken cancellationToken = default)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var movie = await _context.Movie.FindAsync(id).ConfigureAwait(false);
+            var movie = await _movieService.GetDetailsAsync(id, cancellationToken).ConfigureAwait(false);
             if (movie == null)
             {
                 return NotFound();
@@ -108,7 +113,7 @@ namespace MovieManager.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,Genre,Price")] Movie movie, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,Title,Director,Actors,Image, Year")] Movie movie, CancellationToken cancellationToken = default)
         {
             if (id != movie.Id)
             {
@@ -117,22 +122,9 @@ namespace MovieManager.Controllers
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(movie);
-                    await _context.SaveChangesAsync().ConfigureAwait(false);
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!await MovieExistsAsync(movie.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                // TODO handle concurrency
+                var updateResult = await _movieService.UpdateAsync(id, movie, cancellationToken).ConfigureAwait(false);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(movie);
@@ -140,15 +132,15 @@ namespace MovieManager.Controllers
 
         // GET: Movies/Delete/5
         [HttpGet]
-        public async Task<IActionResult> Delete(int? id, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken = default)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var movie = await _context.Movie
-                .FirstOrDefaultAsync(m => m.Id == id).ConfigureAwait(false);
+            // TODO handle errors
+            var movie = await _movieService.GetDetailsAsync(id, cancellationToken).ConfigureAwait(false);
             if (movie == null)
             {
                 return NotFound();
@@ -158,19 +150,22 @@ namespace MovieManager.Controllers
         }
 
         // DELETE: Movies/Delete/5
-        [HttpDelete, ActionName("Delete")]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DeleteConfirmed(string id, CancellationToken cancellationToken = default)
         {
-            var movie = await _context.Movie.FindAsync(id).ConfigureAwait(false);
-            _context.Movie.Remove(movie);
-            await _context.SaveChangesAsync().ConfigureAwait(false);
-            return RedirectToAction(nameof(Index));
-        }
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-        private Task<bool> MovieExistsAsync(int id, CancellationToken cancellationToken = default)
-        {
-            return _context.Movie.AnyAsync(e => e.Id == id, cancellationToken);
+            // TODO handle errors
+            var deleteResult = await _movieService.RemoveAsync(id, cancellationToken).ConfigureAwait(false);
+            if (!deleteResult.IsAcknowledged)
+            {
+                return NotFound();
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }

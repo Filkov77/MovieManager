@@ -24,13 +24,16 @@
                 @Html.DisplayNameFor(model => model.Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ReleaseDate)
+                @Html.DisplayNameFor(model => model.Director)
+            </th>
+            <th width="100px">
+                @Html.DisplayNameFor(model => model.Actors)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Genre)
+                @Html.DisplayNameFor(model => model.Image)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Price)
+                @Html.DisplayNameFor(model => model.Year)
             </th>
             <th></th>
         </tr>
@@ -43,13 +46,16 @@
                     @Html.DisplayFor(modelItem => item.Title)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.ReleaseDate)
+                    @Html.DisplayFor(modelItem => item.Director)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Genre)
+                    @Html.DisplayFor(modelItem => item.Actors)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Price)
+                    <img src="@item.Image" alt="Sample Image" width="200px" />
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Year)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
