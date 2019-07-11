@@ -26,7 +26,7 @@ namespace MovieManager.Tests
             };
 
             var mockMovieService = new Mock<IMongoCollection<Movie>>();
-            mockMovieService.Setup(collection => collection.FindAsync(It.IsAny<FilterDefinition<Movie>>(), It.IsAny<FindOptions>(), It.IsAny<CancellationToken>())).Returns(data).ReturnsAsync(data);
+            // mockMovieService.Setup(collection => collection.FindAsync(It.IsAny<FilterDefinition<Movie>>(), It.IsAny<FindOptions>(), It.IsAny<CancellationToken>())).Returns(data).ReturnsAsync(data);
 
 
         }
