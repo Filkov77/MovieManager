@@ -19,8 +19,8 @@ namespace MovieManager.Tests
         [Fact]
         public async Task Index_ReturnsAViewResult_WithAListOfMovies()
         {
-            var movie1 = new Movie { Genre = "Comedy", Id = "id1", Price = 2.22m, ReleaseDate = DateTime.Now, Title = "Movie1" };
-            var movie2 = new Movie { Genre = "Comedy", Id = "id2", Price = 2.22m, ReleaseDate = DateTime.Now, Title = "Movie2" };
+            var movie1 = new Movie { Director = "Director1", Id = "id1", Year = 1333, Actors = "Item1, Item2", Title = "Movie1", Image = "path1" };
+            var movie2 = new Movie { Director = "Director2", Id = "id2", Year = 1112, Actors = "Item3, Item4", Title = "Movie2", Image = "path2" };
             var data = new List<Movie>
             {
                 movie1,

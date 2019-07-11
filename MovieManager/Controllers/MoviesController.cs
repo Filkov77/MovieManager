@@ -71,7 +71,7 @@ namespace MovieManager.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseDate,Genre,Price")] Movie movie, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Create([Bind("Id,Title,Director,Actors,Image, Year")] Movie movie, CancellationToken cancellationToken = default)
         {
             if (ModelState.IsValid)
             {
@@ -103,7 +103,7 @@ namespace MovieManager.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,Title,ReleaseDate,Genre,Price")] Movie movie, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,Title,Director,Actors,Image, Year")] Movie movie, CancellationToken cancellationToken = default)
         {
             if (id != movie.Id)
             {
@@ -140,7 +140,7 @@ namespace MovieManager.Controllers
         }
 
         // DELETE: Movies/Delete/5
-        [HttpDelete, ActionName("Delete")]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id, CancellationToken cancellationToken = default)
         {

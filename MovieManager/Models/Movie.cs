@@ -16,17 +16,17 @@ namespace MovieManager.Models
         [BsonElement("title")]
         public string Title { get; set; }
 
-        [BsonElement("releasedate")]
-        [Display(Name = "Release Date")]
-        [DataType(DataType.Date)]
-        public DateTime ReleaseDate { get; set; }
+        [BsonElement("director")]
+        public string Director { get; set; }
 
-        [BsonElement("genre")]
-        public string Genre { get; set; }
+        // TODO map as a list if needed
+        [BsonElement("actors")]
+        public string Actors { get; set; }
 
-        [BsonElement("price")]
-        [DataType(DataType.Currency)]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal Price { get; set; }
+        [BsonElement("image")]
+        public string Image { get; set; }
+
+        [BsonElement("year")]
+        public int Year { get; set; }
     }
 }
