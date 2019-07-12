@@ -37,11 +37,11 @@ namespace MovieManager
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.Configure<MovieDatabaseSettings>(
-                Configuration.GetSection(nameof(MovieDatabaseSettings)));
+            services.Configure<DatabaseSettings>(
+                Configuration.GetSection(nameof(DatabaseSettings)));
 
-            services.AddSingleton<IMovieDatabaseSettings>(sp =>
-                sp.GetRequiredService<IOptions<MovieDatabaseSettings>>().Value);
+            services.AddSingleton<IDatabaseSettings>(sp =>
+                sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
 
             services.AddSingleton(typeof(IDbService<>), typeof(DbService<>));
 

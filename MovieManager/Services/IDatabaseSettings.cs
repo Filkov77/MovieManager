@@ -1,8 +1,8 @@
 ﻿namespace MovieManager.Services
 {
-    public interface IMovieDatabaseSettings
+    public interface IDatabaseSettings
     {
-        string MovieCollectionName { get; set; }
+        string DatabaseCollectionName { get; set; }
         string ConnectionString { get; set; }
         string DatabaseName { get; set; }
     }

@@ -11,49 +11,49 @@ namespace MovieManager.Services
 {
     public class DbService<T> : IDbService<T> where T : IIdentifiable
     {
-        private readonly IMongoCollection<T> _movies;
+        private readonly IMongoCollection<T> _items;
 
-        public DbService(IMovieDatabaseSettings settings)
+        public DbService(IDatabaseSettings settings)
         {
             var client = new MongoClient(settings.ConnectionString);
             var database = client.GetDatabase(settings.DatabaseName);
 
-            _movies = database.GetCollection<T>(settings.MovieCollectionName);
+            _items = database.GetCollection<T>(settings.DatabaseCollectionName);
         }
 
         public async Task<List<T>> GetAsync(string searchString, string propertyName, CancellationToken cancellationToken = default)
         {
             // TODO move filter to appropriate class
-            FilterDefinition<T> filter = string.IsNullOrEmpty(searchString) ? Builders<T>.Filter.Empty : Builders<T>.Filter.Regex(propertyName, new BsonRegularExpression(searchString.ToLower()));
+            FilterDefinition<T> filter = string.IsNullOrEmpty(searchString) ? Builders<T>.Filter.Empty : Builders<T>.Filter.Regex(propertyName, new BsonRegularExpression(searchString, "i"));
 
-            var allMoves = await _movies.FindAsync(filter, null, cancellationToken);
+            var allItems = await _items.FindAsync(filter, null, cancellationToken);
 
-            return await (allMoves).ToListAsync();
+            return await (allItems).ToListAsync();
         }
 
         public async Task<List<T>> GetAsync(CancellationToken cancellationToken = default)
         {
-            var allMoves = await _movies.FindAsync(Builders<T>.Filter.Empty, null, cancellationToken);
+            var allItems = await _items.FindAsync(Builders<T>.Filter.Empty, null, cancellationToken);
 
-            return await (allMoves).ToListAsync();
+            return await (allItems).ToListAsync();
         }
 
         public async Task<T> GetDetailsAsync(string id, CancellationToken cancellationToken = default) =>
-            await (await _movies.FindAsync(movie => movie.Id == id)).FirstOrDefaultAsync();
+            await (await _items.FindAsync(item => item.Id == id)).FirstOrDefaultAsync();
 
-        public async Task<T> CreateAsync(T movie, CancellationToken cancellationToken = default)
+        public async Task<T> CreateAsync(T item, CancellationToken cancellationToken = default)
         {
-            await _movies.InsertOneAsync(movie, null, cancellationToken);
-            return movie;
+            await _items.InsertOneAsync(item, null, cancellationToken);
+            return item;
         }
 
-        public async Task<ReplaceOneResult> UpdateAsync(string id, T movieIn, CancellationToken cancellationToken = default) =>
-            await _movies.ReplaceOneAsync(movie => movie.Id == id, movieIn, null, cancellationToken);
+        public async Task<ReplaceOneResult> UpdateAsync(string id, T itemIn, CancellationToken cancellationToken = default) =>
+            await _items.ReplaceOneAsync(item => item.Id == id, itemIn, null, cancellationToken);
 
-        public async Task<DeleteResult> RemoveAsync(T movieIn, CancellationToken cancellationToken = default) =>
-            await _movies.DeleteOneAsync(movie => movie.Id == movieIn.Id, null, cancellationToken);
+        public async Task<DeleteResult> RemoveAsync(T itemIn, CancellationToken cancellationToken = default) =>
+            await _items.DeleteOneAsync(item => item.Id == itemIn.Id, null, cancellationToken);
 
         public async Task<DeleteResult> RemoveAsync(string id, CancellationToken cancellationToken = default) =>
-            await _movies.DeleteOneAsync(movie => movie.Id == id, cancellationToken);
+            await _items.DeleteOneAsync(item => item.Id == id, cancellationToken);
     }
 }
