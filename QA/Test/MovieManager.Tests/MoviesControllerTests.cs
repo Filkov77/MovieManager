@@ -27,7 +27,7 @@ namespace MovieManager.Tests
             var mockMovieService = new Mock<IDbService<Movie>>();
             mockMovieService.Setup(m => m.GetAsync(It.IsAny<CancellationToken>())).ReturnsAsync(data);
 
-            var controller = new MoviesController(mockMovieService.Object);
+            var controller = new MoviesController(mockMovieService.Object, null);
             // Act
             var result = await controller.Index(null);
 
