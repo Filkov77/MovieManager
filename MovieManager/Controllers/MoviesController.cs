@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MovieManager.Models;
 using MovieManager.Services;
 
@@ -12,17 +13,19 @@ namespace MovieManager.Controllers
 {
     public class MoviesController : Controller
     {
-        // private readonly MovieManagerContext _context;
+        private readonly ILogger<MoviesController> _logger;
         private readonly IDbService<Movie> _movieService;
 
-        public MoviesController(IDbService<Movie> movieService)
+        public MoviesController(IDbService<Movie> movieService, ILogger<MoviesController> logger)
         {
             _movieService = movieService;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index(string searchString, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Getting item list");
             //TODO add paging with skip limit
             IList<Movie> movies;
             if (string.IsNullOrEmpty(searchString))
@@ -42,7 +45,9 @@ namespace MovieManager.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var errorModel = new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier };
+            _logger.LogError($"Error: {errorModel.ToString()}");
+            return View(errorModel);
         }
 
         // GET: Movies/Details/5
