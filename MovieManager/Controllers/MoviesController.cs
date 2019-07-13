@@ -3,11 +3,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MovieManager.Models;
 using MovieManager.Services;
+using MovieManager.Services.Queries;
 
 namespace MovieManager.Controllers
 {
@@ -16,9 +18,11 @@ namespace MovieManager.Controllers
         private readonly ILogger<MoviesController> _logger;
         private readonly IDbService<Movie> _movieService;
 
-        public MoviesController(IDbService<Movie> movieService, ILogger<MoviesController> logger)
+        private readonly IMediator _mediator;
+
+        public MoviesController(IMediator mediator, ILogger<MoviesController> logger)
         {
-            _movieService = movieService;
+            _mediator = mediator;
             _logger = logger;
         }
 
@@ -26,16 +30,11 @@ namespace MovieManager.Controllers
         public async Task<IActionResult> Index(string searchString, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Getting item list");
-            //TODO add paging with skip limit
-            IList<Movie> movies;
-            if (string.IsNullOrEmpty(searchString))
-            {
-                movies = await _movieService.GetAsync(cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                movies = await _movieService.GetAsync(searchString, nameof(Movie.Title), cancellationToken).ConfigureAwait(false);
-            }
+            var request = new MoviesQuery { QueryString = searchString };
+
+            var movies = await _mediator.Send(request, cancellationToken);
+
+            //TODO add paging with skip and limit
 
             return View(movies);
         }
@@ -59,7 +58,9 @@ namespace MovieManager.Controllers
                 return NotFound();
             }
 
-            var movie = await _movieService.GetDetailsAsync(id, cancellationToken).ConfigureAwait(false);
+            var request = new MovieDetaisQuery { DetailsId = id };
+
+            var movie = await _mediator.Send(request, cancellationToken);
             if (movie == null)
             {
                 return NotFound();
@@ -90,7 +91,10 @@ namespace MovieManager.Controllers
         {
             if (ModelState.IsValid)
             {
-                var createdMovie = await _movieService.CreateAsync(movie, cancellationToken).ConfigureAwait(false);
+                var request = new MovieCreateCommand { Movie = movie };
+
+                var createdMovie = await _mediator.Send(request, cancellationToken);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(movie);
@@ -105,7 +109,9 @@ namespace MovieManager.Controllers
                 return NotFound();
             }
 
-            var movie = await _movieService.GetDetailsAsync(id, cancellationToken).ConfigureAwait(false);
+            var request = new MovieDetaisQuery { DetailsId = id };
+            var movie = await _mediator.Send(request, cancellationToken);
+
             if (movie == null)
             {
                 return NotFound();
@@ -127,9 +133,10 @@ namespace MovieManager.Controllers
 
             if (ModelState.IsValid)
             {
-                // TODO handle concurrency
-                var updateResult = await _movieService.UpdateAsync(id, movie, cancellationToken).ConfigureAwait(false);
+                // TODO handle concurrency errors
+                var request = new MovieUpdateCommand { Movie = movie, Id = id };
 
+                var updateResult = await _mediator.Send(request, cancellationToken);
                 return RedirectToAction(nameof(Index));
             }
             return View(movie);
@@ -144,8 +151,9 @@ namespace MovieManager.Controllers
                 return NotFound();
             }
 
-            // TODO handle errors
-            var movie = await _movieService.GetDetailsAsync(id, cancellationToken).ConfigureAwait(false);
+            var request = new MovieDetaisQuery { DetailsId = id };
+            var movie = await _mediator.Send(request, cancellationToken);
+
             if (movie == null)
             {
                 return NotFound();
@@ -165,7 +173,10 @@ namespace MovieManager.Controllers
             }
 
             // TODO handle errors
-            var deleteResult = await _movieService.RemoveAsync(id, cancellationToken).ConfigureAwait(false);
+            var request = new MovieDeleteCommand { Id = id };
+
+            var deleteResult = await _mediator.Send(request, cancellationToken);
+
             if (!deleteResult.IsAcknowledged)
             {
                 return NotFound();
