@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace MovieManager.Models
+namespace MovieManager.Services.DomainModels
 {
-    public class Movie : IIdentifiable
+    public class DbMovie : IIdentifiable
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

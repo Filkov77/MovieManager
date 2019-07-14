@@ -1,5 +1,5 @@
 ﻿using MongoDB.Driver;
-using MovieManager.Models;
+using MovieManager.Services.DomainModels;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

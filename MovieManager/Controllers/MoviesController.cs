@@ -1,22 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MovieManager.Models;
-using MovieManager.Services;
 using MovieManager.Services.Queries;
+using MovieManager.ViewModels;
 
 namespace MovieManager.Controllers
 {
     public class MoviesController : Controller
     {
         private readonly ILogger<MoviesController> _logger;
-        private readonly IDbService<Movie> _movieService;
 
         private readonly IMediator _mediator;
 
@@ -87,11 +83,11 @@ namespace MovieManager.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Director,Actors,Image, Year")] Movie movie, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Create([Bind("Id,Title,Director,Actors,Image, Year")] MovieViewModel movie, CancellationToken cancellationToken = default)
         {
             if (ModelState.IsValid)
             {
-                var request = new MovieCreateCommand { Movie = movie };
+                var request = new MovieCreateCommand { MovieViewModel = movie };
 
                 var createdMovie = await _mediator.Send(request, cancellationToken);
 
@@ -124,7 +120,7 @@ namespace MovieManager.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,Title,Director,Actors,Image, Year")] Movie movie, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,Title,Director,Actors,Image, Year")] MovieViewModel movie, CancellationToken cancellationToken = default)
         {
             if (id != movie.Id)
             {
@@ -134,7 +130,7 @@ namespace MovieManager.Controllers
             if (ModelState.IsValid)
             {
                 // TODO handle concurrency errors
-                var request = new MovieUpdateCommand { Movie = movie, Id = id };
+                var request = new MovieUpdateCommand { MovieViewModel = movie, Id = id };
 
                 var updateResult = await _mediator.Send(request, cancellationToken);
                 return RedirectToAction(nameof(Index));

@@ -1,11 +1,11 @@
-﻿using MovieManager.Models;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
 using MongoDB.Bson;
+using MovieManager.Services.DomainModels;
 
 namespace MovieManager.Services
 {

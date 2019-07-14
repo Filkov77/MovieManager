@@ -1,29 +1,30 @@
-﻿using MovieManager.Models;
-using MovieManager.Services.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MovieManager.Services;
 using MovieManager.Services.Queries;
 using MovieManager.Infrastructure.Exceptions;
 using MediatR;
+using MovieManager.Services.DomainModels;
+using MovieManager.ViewModels;
+using AutoMapper;
 
 namespace MovieManager.Services.QueryHandlers
 {
-    public class MoviesQueryHandler : IRequestHandler<MoviesQuery, IList<Movie>>
+    public class MoviesQueryHandler : IRequestHandler<MoviesQuery, IList<MovieViewModel>>
     {
-        private IDbService<Movie> _movieDbService;
-        public MoviesQueryHandler(IDbService<Movie> movieService)
+        private IDbService<DbMovie> _movieDbService;
+        private IMapper _mapper;
+
+        public MoviesQueryHandler(IDbService<DbMovie> movieService, IMapper mapper)
         {
             _movieDbService = movieService;
+            _mapper = mapper;
         }
 
-        public async Task<IList<Movie>> Handle(MoviesQuery moviesQuery, CancellationToken cancellationToken = default)
+        public async Task<IList<MovieViewModel>> Handle(MoviesQuery moviesQuery, CancellationToken cancellationToken = default)
         {
             Check.NotNull(moviesQuery, nameof(moviesQuery));
-            IList<Movie> movies;
+            IList<DbMovie> movies;
             // TODO filter!!!
             if (string.IsNullOrEmpty(moviesQuery.QueryString))
             {
@@ -31,10 +32,10 @@ namespace MovieManager.Services.QueryHandlers
             }
             else
             {
-                movies = await _movieDbService.GetAsync(moviesQuery.QueryString, nameof(Movie.Title), cancellationToken).ConfigureAwait(false);
+                movies = await _movieDbService.GetAsync(moviesQuery.QueryString, nameof(DbMovie.Title), cancellationToken).ConfigureAwait(false);
             }
 
-            return movies;
+            return _mapper.Map<List<MovieViewModel>>(movies);
         }
     }
 }
