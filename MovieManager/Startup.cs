@@ -15,6 +15,9 @@ using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using MovieManager.Services;
 using Microsoft.Extensions.Options;
+using MovieManager.Infrastructure;
+using System.Reflection;
+using MediatR;
 
 namespace MovieManager
 {
@@ -30,6 +33,7 @@ namespace MovieManager
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMediatR(Assembly.GetExecutingAssembly());
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -44,6 +48,7 @@ namespace MovieManager
                 sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
 
             services.AddSingleton(typeof(IDbService<>), typeof(DbService<>));
+            //services.AddMediatRWithAssemblies();
 
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);

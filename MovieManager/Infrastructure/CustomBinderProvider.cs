@@ -1,20 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 
-public class CustomBinderProvider : IModelBinderProvider
+namespace MovieManager.Infrastructure
 {
-    public IModelBinder GetBinder(ModelBinderProviderContext context)
+    public class CustomBinderProvider : IModelBinderProvider
     {
-        if (context == null)
+        public IModelBinder GetBinder(ModelBinderProviderContext context)
         {
-            throw new ArgumentNullException(nameof(context));
-        }
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
 
-        if (context.Metadata.ModelType == typeof(decimal))
-        {
-            return new DecimalModelBinder();
-        }
+            if (context.Metadata.ModelType == typeof(decimal))
+            {
+                return new DecimalModelBinder();
+            }
 
-        return null;
+            return null;
+        }
     }
 }
